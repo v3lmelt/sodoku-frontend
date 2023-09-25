@@ -1,5 +1,6 @@
 <script>
 import {ref} from 'vue'
+import router from "@/router";
 export default {
   setup(){
 
@@ -61,11 +62,29 @@ export default {
         }
       }, 400)
     }
+
+    /**
+     * 设置数独难度，传入的difficulty的值应当为"easy", "normal", "hard"
+     * @param difficulty
+     */
+    function setDifficulty(difficulty){
+      if(difficulty === "easy" || difficulty === "normal" || difficulty === "hard"){
+        localStorage.setItem("difficulty", difficulty)
+      }else{
+        // 如果填入的是无效值，那么默认简单难度
+        localStorage.setItem("difficulty", 'easy')
+      }
+
+      // 选择后跳转至9宫格界面
+      router.push({name: 'selectSudokuPage'})
+    }
     /**
      * 变量
      */
     const isDialogVisible = ref(false);
-    return {consoleText,isDialogVisible}
+
+
+    return {consoleText,setDifficulty,isDialogVisible}
   },
   mounted() {
     this.consoleText(['Multithread Sudoku', '多线程数独'], 'text',['tomato','rebeccapurple','lightblue'])
@@ -81,7 +100,7 @@ export default {
   <div class='console-container'><span id='text'></span><div class='console-underscore' id='console'>&#95;</div></div>
   <el-button class="start-button" size="large" @click="isDialogVisible = true">开始</el-button>
 
-  <!-- 对话框 -->
+  <!-- 难度选择对话框 -->
 
   <el-dialog
       v-model="isDialogVisible"
@@ -91,17 +110,20 @@ export default {
   >
     <span slot="footer" >
       <el-row justify="space-around">
-        <el-col :span="8" class="button-group"><el-button size="large" type="primary">
+        <el-col :span="8" class="button-group">
+          <el-button size="large" type="primary" @click="setDifficulty('easy')">
           <span slot="default" style="font-size: 30px">
             简单
           </span>
           </el-button></el-col>
-        <el-col :span="8" class="button-group"><el-button size="large" type="primary">
+        <el-col :span="8" class="button-group">
+          <el-button size="large" type="primary" @click="setDifficulty('normal')">
           <span slot="default" style="font-size: 30px">
             中等
           </span>
         </el-button></el-col>
-        <el-col :span="8" class="button-group"><el-button size="large" type="primary">
+        <el-col :span="8" class="button-group">
+          <el-button size="large" type="primary" @click="setDifficulty('hard')">
           <span slot="default" style="font-size: 30px">
             困难
           </span>

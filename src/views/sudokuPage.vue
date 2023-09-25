@@ -6,18 +6,9 @@ export default {
     };
   },
   mounted() {
-    const sudoku = [
-      [5, 3, 0, 0, 7, 0, 0, 0, 0],
-      [6, 0, 0, 1, 9, 5, 0, 0, 0],
-      [0, 9, 8, 0, 0, 0, 0, 6, 0],
-      [8, 0, 0, 0, 6, 0, 0, 0, 3],
-      [4, 0, 0, 8, 0, 3, 0, 0, 1],
-      [7, 0, 0, 0, 2, 0, 0, 0, 6],
-      [0, 6, 0, 0, 0, 0, 2, 8, 0],
-      [0, 0, 0, 4, 1, 9, 0, 0, 5],
-      [0, 0, 0, 0, 8, 0, 0, 7, 9]
-    ];
+    const sudoku = JSON.parse(localStorage.getItem("sudokuArray"))[this.$route.params.sudokuID]
 
+    console.log(sudoku)
     for (let i = 0; i < 3; i++) {
       for (let j = 0; j < 3; j++) {
         let smallSquares = { cells: [] };
@@ -27,6 +18,7 @@ export default {
               rowIndex: m,
               colIndex: n,
               squareIndex: i + j * 3,
+              valueIndex:sudoku[m][n],
               cellIndex: m * 9 + n,
               value: sudoku[m][n] || null
             };
@@ -38,6 +30,7 @@ export default {
     }
   },
   methods: {
+    // 自定义比较函数，根据 cellIndex 属性从大到小排序
     highlightCells(cellIndex) {
       let cells = document.querySelectorAll('.cells');
       cells.forEach((cells) => {
@@ -63,24 +56,47 @@ export default {
       // 对数组进行排序
       cellsArray.sort(compare);
       const targetCell = cellsArray[cellIndex];
-      const { rowIndex, colIndex, squareIndex } = targetCell.dataset;
+      const { rowIndex, colIndex, squareIndex, valueIndex } = targetCell.dataset;
       const targetCells = document.querySelectorAll(
           `.cells[data-row-index="${rowIndex}"], .cells[data-col-index="${colIndex}"], .cells[data-square-index="${squareIndex}"]`
       );
+      if(valueIndex != "0" ){
+        const sameValueCells = document.querySelectorAll(
+            `.cells[data-value-index="${valueIndex}"]`
+        )
+        sameValueCells.forEach((cells) => {
+          cells.classList.add('highlight2');
+        });
+      }
 
       targetCells.forEach((cells) => {
         cells.classList.add('highlight');
       });
 
+
       targetCell.classList.add('highlight2');
     }
   }
-};
+}
 </script>
 <template>
   <div>
-    <div class="help-button">帮助</div>
-    <div class="large-square">
+    <!-- 界面顶部栏：返回、标题、帮助按钮 -->
+    <!-- <div class="top-bar">
+      <el-page-header :icon="ArrowLeft" @back="() => {this.$router.push({name: 'selectSudokuPage'})}" >
+        <template #content>
+          <span class="title"> 选择数独 </span>
+        </template>
+        <template #extra>
+          <div class="flex items-center">
+            <el-button class="help-button">帮助</el-button>
+          </div>
+        </template>
+      </el-page-header>
+      <el-divider />
+    </div> -->
+
+    <div class="sudoku-square">
       <div v-for="(smallSquares, index) in smallSquares" :key="index" class="small-square">
         <span
             v-for="(cells, cellIndex) in smallSquares.cells"
@@ -90,37 +106,33 @@ export default {
             :data-col-index="cells.colIndex"
             :data-square-index="cells.squareIndex"
             :data-cell-index="cells.cellIndex"
+            :data-value-index="cells.valueIndex"
             @click="highlightCells(cells.cellIndex)"
         >
-          {{ cells.cellIndex }}
+          {{ cells.value }}
         </span>
       </div>
     </div>
   </div>
 </template>
 <style>
-.background {
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  bottom: 0;
-  height: 100vh;
-  width: 100vw;
-  background-color: rgb(193, 191, 191);
-}
 
-.help-button {
-  font-size: 40px;
-  color: rgb(0, 120, 120);
-}
-.large-square {
+.sudoku-square {
+  position: fixed;
+  left: 0;
+  right:0;
+  top:5%;
   width: 75vmin;
   height: 75vmin;
-  margin: auto;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 3rem;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
+  border-style: solid;
+  border-width: 0.05rem;
+  background-color: #e0e0e0;
 }
 
 .small-square {
@@ -128,26 +140,27 @@ export default {
   flex-wrap: wrap;
   justify-content: space-between;
   align-content: space-between;
-  width: calc(32%);
-  height: calc(32%);
-  background-image: linear-gradient(to bottom right, rgb(219, 248, 251), rgb(160, 240, 237));
+  width: 33.3%;
+  height: 33.3%;
+  background-color: #fdfdfd;
   border-style: solid;
-  border-color: rgb(105, 201, 169);
-  border-width: 0.3vmin;
+  border-color: rgb(52, 71, 96);
+  border-width: 0.01rem;
+  font-size: 5rem;
 }
 
 .cells {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: calc(33.3% - 2px);
-  height: calc(33.3% - 2px);
+  width: 33.3%;
+  height: 33.3%;
   background-color: rgb(255, 255, 255);
   opacity: 0.9;
   border-style: outset;
   border-width: 1px;
   border-radius: 3px;
-  font-size: 1em;
+  font-size: 1rem;
 }
 
 .serial-number {
@@ -157,12 +170,12 @@ export default {
 }
 
 .highlight {
-  background-color: rgb(207, 207, 207) !important;
+  background-color: rgb(224, 233, 241) !important;
   border-color: #000 !important;
 }
 
 .highlight2 {
-  background-color: rgb(177, 177, 177) !important;
+  background-color: rgb(186, 220, 249) !important;
   border-color: #000 !important;
 }
 </style>

@@ -1,37 +1,41 @@
 
 <script>
-import {request} from "axios";
-
+import request from '../utils/request'
+import {dataStore} from "@/stores/dataStore";
 export default {
   data() {
     return {
-      dynamicHTML: ''
+      dynamicHTML: '',
     };
   },
   mounted() {
-    this.generateSudoku();
+    // 先获取难度
+    let diff = localStorage.getItem("difficulty")
+    // 用户不主动点击刷新数独的情况下，数独只从后台获取一次
+    if(!localStorage.getItem("sudokuArray")){
+      // 从后端获取数独
+      request.get("fast-sudoku-list/" + diff).then(
+          (res) => {
+            // 拿到的数据保存在localStorage中
+            localStorage.setItem("sudokuArray", JSON.stringify(res.sudoku))
+            this.generateSudoku();
+            this.animation();
+          }
+      )
+    }else{
+      this.generateSudoku();
+      this.refreshAnimation();
+    }
 
-    // 从后端获取数独
-    request.get('/sudoku').then(
-        (res) => {
-          console.log(res.data)
-        }
-    )
+
+    window.jumpPage = (ID) => {
+      this.$router.push({ name: 'sudokuPage', params: {'sudokuID': ID } });
+    }
   },
   methods: {
     //生成数独界面
     generateSudoku() {
-      let sudoku = [
-        [5, 3, 0, 0, 7, 0, 0, 0, 0],
-        [6, 0, 0, 1, 9, 5, 0, 0, 0],
-        [0, 9, 8, 0, 0, 0, 0, 6, 0],
-        [8, 0, 0, 0, 6, 0, 0, 0, 3],
-        [4, 0, 0, 8, 0, 3, 0, 0, 1],
-        [7, 0, 0, 0, 2, 0, 0, 0, 6],
-        [0, 6, 0, 0, 0, 0, 2, 8, 0],
-        [0, 0, 0, 4, 1, 9, 0, 0, 5],
-        [0, 0, 0, 0, 8, 0, 0, 7, 9]
-      ];
+      let sudokuArrays = JSON.parse(localStorage.getItem("sudokuArray"))
       //循环动态生成html代码
       let dynamicHTML = '';
       //两个for循环生成九个小正方形作为九宫
@@ -40,19 +44,32 @@ export default {
           //fake-small-square是背景
           dynamicHTML += `<div class="fake-small-square" style="transform: scale(1.5); opacity: 0;">`;
           //real-small-square是真正的宫
-          dynamicHTML += `<div class="real-small-square">`;
+          let sudokuID = i * 3 + j;
+          dynamicHTML += `<div class="real-small-square" onclick="jumpPage(${sudokuID})" >`;
           //每个宫内有两个for循环生成81个小方格作为数独预览
           for (let m = 0; m < 9; m++) {
             for (let n = 0; n < 9; n++) {
-              let value = sudoku[m % 9][n % 9];
-              //如果值为0则代表该空格挖空了
+
+              // 根据 i 和 j 的值选择相应的数独预览数据数组，并获取数据
+              let value = sudokuArrays[i * 3 + j][m % 9][n % 9];
+              // 如果值为 0 则代表该空格挖空了
               dynamicHTML += `<span class="cell">${value === 0 ? '' : value}</span>`;
             }
           }
           dynamicHTML += `</div></div>`;
         }
       }
+      if(!localStorage.getItem("sudokuArray")){
+
+      }
       this.dynamicHTML = dynamicHTML;
+    },
+
+    /**
+     * 数独动画
+     */
+
+    animation(){
       //生成九个数独图形的动画，每个数独先后生成，从1.5倍到原大小，透明度由0到1
       setTimeout(() => {
         let divs = document.querySelectorAll(".fake-small-square");
@@ -62,40 +79,74 @@ export default {
             //设置初始样式
             divs[k].style.transform = "scale(1.5)";
             divs[k].style.opacity = 0.0;
-
+            divs[k].style.pointerEvents = 'none';
             setTimeout(() => {
+              //最终样式
               divs[k].style.transition = "all .5s ease-out";
               divs[k].style.transform = "scale(1)";
               divs[k].style.opacity = 1;
-
             }, 100);
+            setTimeout(() => {
+              divs[k].style.pointerEvents = 'auto';
+            }, 150 * (9-k));
           }, 100 * k);
         }
-      }, 100);
+      }, 1);
+    },
+
+    /**
+     * 已存在数独用户再点击刷新时则不再播放动画
+     */
+
+    refreshAnimation(){
+      //从本地拿数据生成，不再播放动画
+      setTimeout(() => {
+        let divs = document.querySelectorAll(".fake-small-square");
+        for (let k = 0; k < divs.length; k++) {
+              //最终样式
+              divs[k].style.transform = "scale(1)";
+              divs[k].style.opacity = 1;
+              divs[k].style.pointerEvents = 'auto';
+        }
+      }, 1);
+    },
+
+    /**
+     * 刷新生成的数独
+     */
+
+    refreshSudoku(){
+      let diff = localStorage.getItem("difficulty")
+
+      request.get("fast-sudoku-list/" + diff).then(
+          (res) => {
+            // 拿到的数据保存在localStorage中
+            localStorage.setItem("sudokuArray", JSON.stringify(res.sudoku))
+            this.generateSudoku();
+            this.animation();
+          }
+      )
     }
   }
 };
 </script>
 <template>
+  <!-- 界面顶部栏：返回、标题、帮助按钮 -->
   <div class="selectSudokuPage">
-    <el-page-header :icon="ArrowLeft">
+  <!-- <el-page-header :icon="ArrowLeft">
       <template #content>
         <span class="title"> 选择数独 </span>
       </template>
       <template #extra>
-        <div class="flex items-center">
           <el-button class="help-button">帮助</el-button>
-        </div>
+          <el-button class="help-button" @click="refreshSudoku()">刷新</el-button>
       </template>
     </el-page-header>
-    <el-divider />
-
-      <div class="large-square" v-html="dynamicHTML"></div>
+    <el-divider /> -->
+      <!-- 生成数独预览 -->
+      <div class="large-square" style="pointer-events: none" v-html="dynamicHTML"></div>
   </div>
-
 </template>
-
-
 
 <style>
 .selectSudokuPage{
@@ -103,21 +154,8 @@ export default {
   left: 0;
   right:0;
   top:5%;
-  padding-left:5em;
-  padding-right:5em;
+  margin-top: 3rem;
 }
-
-.help-button {
-  font-size: 3.5vmin;
-  color: black;
-  border-style: solid ;
-  border-color: white;
-}
-el-page-header{
-
-}
-
-
 .title {
   display: flex;
   justify-content: center;
@@ -167,7 +205,7 @@ el-page-header{
   align-items: center;
   width: 11.11%;
   height: 11.11%;
-  font-size: 1em;
+  font-size: 0.5rem;
   background-color: white;
   border-style: outset;
   border-width: 1px;
