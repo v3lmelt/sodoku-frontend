@@ -6,6 +6,7 @@ export default {
   data() {
     return {
       dynamicHTML: '',
+      selectedDifficulty: '',
     };
   },
   mounted() {
@@ -116,7 +117,7 @@ export default {
      */
 
     refreshSudoku(){
-      let diff = localStorage.getItem("difficulty")
+      let diff = this.selectedDifficulty
 
       request.get("fast-sudoku-list/" + diff).then(
           (res) => {
@@ -133,6 +134,7 @@ export default {
 <template>
   <!-- 界面顶部栏：返回、标题、帮助按钮 -->
   <div class="selectSudokuPage">
+
   <!-- <el-page-header :icon="ArrowLeft">
       <template #content>
         <span class="title"> 选择数独 </span>
@@ -144,8 +146,23 @@ export default {
     </el-page-header>
     <el-divider /> -->
       <!-- 生成数独预览 -->
+    <div class="select-sudoku-page-content">
+      <div class="refresh">
+        <!-- 刷新按钮 -->
+        <el-button class="refresh-button" @click="refreshSudoku()">刷新</el-button>
+
+        <!-- 单选框 -->
+        <el-radio-group v-model="selectedDifficulty" size="default">
+          <el-radio-button label="easy">简单</el-radio-button>
+          <el-radio-button label="normal">中等</el-radio-button>
+          <el-radio-button label="hard">困难</el-radio-button>
+        </el-radio-group>
+      </div>
       <div class="large-square" style="pointer-events: none" v-html="dynamicHTML"></div>
-  </div>
+
+      </div>
+
+    </div>
 </template>
 
 <style>
@@ -154,7 +171,20 @@ export default {
   left: 0;
   right:0;
   top:5%;
-  margin-top: 3rem;
+  margin-top: 8vh;
+}
+.select-sudoku-page-content{
+  height: 1000px;
+}
+.refresh{
+  display: flex;
+  flex-direction: row-reverse;
+
+  padding-right: 5rem;
+  padding-bottom: 0.8rem;
+  .refresh-button{
+    margin-left: 1rem;
+  }
 }
 .title {
   display: flex;
@@ -164,8 +194,8 @@ export default {
 }
 
 .large-square {
-  width: 80vmin;
-  height: 80vmin;
+  width: 75vmin;
+  height: 75vmin;
   margin: auto;
   display: flex;
   flex-wrap: wrap;

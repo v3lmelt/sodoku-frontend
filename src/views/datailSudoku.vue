@@ -1,6 +1,7 @@
 <script>
 import router from "@/router";
 import request from '../utils/request'
+import selectSudokuPage from "@/views/selectSudokuPage.vue";
 export default {
   methods:{
 
@@ -19,7 +20,6 @@ export default {
         </template>
         <template #extra>
           <el-button class="help-button">帮助</el-button>
-          <el-button class="help-button" @click="refreshSudoku()">刷新</el-button>
         </template>
       </el-page-header>
       <el-divider />

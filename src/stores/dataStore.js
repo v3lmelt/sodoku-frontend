@@ -15,5 +15,7 @@ export const dataStore = defineStore('globalData', () => {
     sudokuArray.value = arr;
   }
 
+
+
   return {sudokuArray, difficulty, setDifficulty, setSudokuArray}
 })
