@@ -1,12 +1,17 @@
 
 <script>
 import request from '../utils/request'
-import {dataStore} from "@/stores/dataStore";
+import {dataStore} from "@/stores/dataStore"
+import { ref } from 'vue'
+import {getSudokuUtil} from "@/utils/sudokuUtil";
 export default {
   data() {
     return {
+      refreshButtonDisable: false,
+      loading :true,
       dynamicHTML: '',
       selectedDifficulty: '',
+      selectedAPI: '',
     };
   },
   mounted() {
@@ -15,7 +20,7 @@ export default {
     // 用户不主动点击刷新数独的情况下，数独只从后台获取一次
     if(!localStorage.getItem("sudokuArray")){
       // 从后端获取数独
-      request.get("fast-sudoku-list/" + diff).then(
+      getSudokuUtil().then(
           (res) => {
             // 拿到的数据保存在localStorage中
             localStorage.setItem("sudokuArray", JSON.stringify(res.sudoku))
@@ -28,6 +33,11 @@ export default {
       this.refreshAnimation();
     }
 
+    // 用户选择的难度应当在难度选项卡上反应出来
+    this.selectedDifficulty = localStorage.getItem("difficulty") || "easy";
+
+    // 用户选择生成的API应当在API选项卡上反应出来
+    this.selectedAPI = localStorage.getItem("APISetting") ||"FAST";
 
     window.jumpPage = (ID) => {
       this.$router.push({ name: 'sudokuPage', params: {'sudokuID': ID } });
@@ -59,9 +69,6 @@ export default {
           }
           dynamicHTML += `</div></div>`;
         }
-      }
-      if(!localStorage.getItem("sudokuArray")){
-
       }
       this.dynamicHTML = dynamicHTML;
     },
@@ -117,14 +124,22 @@ export default {
      */
 
     refreshSudoku(){
-      let diff = this.selectedDifficulty
-
-      request.get("fast-sudoku-list/" + diff).then(
+      // 禁用用户再点击刷新按钮，防止频繁向服务器发送请求
+      this.refreshButtonDisable = true;
+      // 修改加载界面
+      this.loading = true;
+      // 修改localStorage中的难度设置
+      localStorage.setItem("difficulty", this.selectedDifficulty);
+      // 修改localStorage里的API设置
+      localStorage.setItem("APISetting", this.selectedAPI);
+      getSudokuUtil().then(
           (res) => {
             // 拿到的数据保存在localStorage中
             localStorage.setItem("sudokuArray", JSON.stringify(res.sudoku))
             this.generateSudoku();
             this.animation();
+            this.loading = false;
+            this.refreshButtonDisable = false;
           }
       )
     }
@@ -149,7 +164,7 @@ export default {
     <div class="select-sudoku-page-content">
       <div class="refresh">
         <!-- 刷新按钮 -->
-        <el-button class="refresh-button" @click="refreshSudoku()">刷新</el-button>
+        <el-button class="refresh-button" @click="refreshSudoku()" :disabled="refreshButtonDisable">刷新</el-button>
 
         <!-- 单选框 -->
         <el-radio-group v-model="selectedDifficulty" size="default">
@@ -157,8 +172,15 @@ export default {
           <el-radio-button label="normal">中等</el-radio-button>
           <el-radio-button label="hard">困难</el-radio-button>
         </el-radio-group>
+
+        <!-- 生成数独使用的API选择 -->
+        <el-radio-group v-model="selectedAPI" size="default" style="margin-right: 1rem">
+          <el-radio-button label="SLOW">SLOW</el-radio-button>
+          <el-radio-button label="FAST">FAST</el-radio-button>
+        </el-radio-group>
+
       </div>
-      <div class="large-square" style="pointer-events: none" v-html="dynamicHTML"></div>
+      <div class="large-square" v-loading="loading" style="pointer-events: none" v-html="dynamicHTML"></div>
 
       </div>
 
@@ -179,9 +201,9 @@ export default {
 .refresh{
   display: flex;
   flex-direction: row-reverse;
-
-  padding-right: 5rem;
-  padding-bottom: 0.8rem;
+  justify-content: center;
+  padding-top: 0.9rem;
+  padding-bottom: 0.5rem;
   .refresh-button{
     margin-left: 1rem;
   }
@@ -251,5 +273,8 @@ export default {
 .real-small-square:hover {
   transform: scale(1.05);
   z-index: 1;
+}
+.example-showcase .el-loading-mask {
+  z-index: 9;
 }
 </style>

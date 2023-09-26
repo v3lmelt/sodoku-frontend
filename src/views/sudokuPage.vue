@@ -80,7 +80,6 @@ export default {
 }
 </script>
 <template>
-  <div>
     <!-- 界面顶部栏：返回、标题、帮助按钮 -->
     <!-- <div class="top-bar">
       <el-page-header :icon="ArrowLeft" @back="() => {this.$router.push({name: 'selectSudokuPage'})}" >
@@ -113,7 +112,6 @@ export default {
         </span>
       </div>
     </div>
-  </div>
 </template>
 <style>
 

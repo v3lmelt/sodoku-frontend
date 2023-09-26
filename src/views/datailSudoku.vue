@@ -1,8 +1,12 @@
 <script>
-import router from "@/router";
-import request from '../utils/request'
-import selectSudokuPage from "@/views/selectSudokuPage.vue";
+import { ref } from 'vue'
+
+
 export default {
+  data(){
+    const drawer = ref(false)
+    return{drawer}
+  },
   methods:{
 
   },
@@ -19,12 +23,30 @@ export default {
           <span class="title"> {{$route.meta.title}} </span>
         </template>
         <template #extra>
-          <el-button class="help-button">帮助</el-button>
+          <el-button class="help-button" @click="drawer = true">帮助</el-button>
         </template>
       </el-page-header>
       <el-divider />
   </div>
-
+  <el-drawer v-model="drawer" :show-close="false" >
+    <template #header>
+      数独帮助
+    </template>
+    <h2>基本规则</h2>
+    <el-divider></el-divider>
+    <li>数独网格由 9x9 个空格组成。</li>
+    <li>您只能使用数字 1 到 9。</li>
+    <li>每个 3×3 宫只能包含数字 1 到 9。</li>
+    <li>每一列只能包含数字 1 到 9。</li>
+    <li>每一行只能包含数字 1 到 9。</li>
+    <li>每个 3×3 宫、每一列或每一行中的每个数字只能使用一次。</li>
+    <li>当所有数独网格都填入正确的数字时，游戏结束。</li>
+    <h2 style="margin-top: 1rem">难度设置</h2>
+    <el-divider></el-divider>
+    <li>简单：你的谜题里将会有25个空格。</li>
+    <li>中等：你的谜题里将会有40个空格。</li>
+    <li>困难：你的谜题里将会有64个空格。</li>
+  </el-drawer>
   <div>
     <router-view></router-view>
   </div>
@@ -44,5 +66,13 @@ export default {
   color: black;
   border-style: solid ;
   border-color: white;
+}
+
+li{
+  font-size: 0.6rem;
+}
+
+h2{
+  font-size: 0.75rem;
 }
 </style>

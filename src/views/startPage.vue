@@ -160,46 +160,44 @@ export default {
 
 <template>
   <!-- 终端文本特效与开始按钮 -->
+      <div class="background"></div>
+      <div v-for="(delay, index) in delays" :key="index" class="square1" :style="getSquareStyle(index)">
+        <!-- 可添加需要插入的内容 -->
+      </div>
+      <div class='console-container'><span id='text'></span><div class='console-underscore' id='console'>&#95;</div></div>
+      <el-button class="start-button" size="large" @click="isDialogVisible = true">开始</el-button>
 
-  <div class="background"></div>
-  <div v-for="(delay, index) in delays" :key="index" class="square1" :style="getSquareStyle(index)">
-    <!-- 可添加需要插入的内容 -->
-  </div>
-  <div class='console-container'><span id='text'></span><div class='console-underscore' id='console'>&#95;</div></div>
-  <el-button class="start-button" size="large" @click="isDialogVisible = true">开始</el-button>
+      <!-- 难度选择对话框 -->
 
-  <!-- 难度选择对话框 -->
-
-  <el-dialog
-      v-model="isDialogVisible"
-      title="请选择难度"
-      width="50%"
-      style="opacity: 0.9"
-  >
-    <span slot="footer" >
-      <el-row justify="space-around">
-        <el-col :span="8" class="button-group">
-          <el-button size="large" type="primary" @click="setDifficulty('easy')">
-          <span slot="default" style="font-size: 30px">
-            简单
-          </span>
-          </el-button></el-col>
-        <el-col :span="8" class="button-group">
-          <el-button size="large" type="primary" @click="setDifficulty('normal')">
-          <span slot="default" style="font-size: 30px">
-            中等
-          </span>
-        </el-button></el-col>
-        <el-col :span="8" class="button-group">
-          <el-button size="large" type="primary" @click="setDifficulty('hard')">
-          <span slot="default" style="font-size: 30px">
-            困难
-          </span>
-        </el-button></el-col>
-    </el-row>
-    </span>
-  </el-dialog>
-
+      <el-dialog
+          v-model="isDialogVisible"
+          title="请选择难度"
+          width="50%"
+          style="opacity: 0.9"
+      >
+        <span slot="footer" >
+          <el-row justify="space-around">
+            <el-col :span="8" class="button-group">
+              <el-button size="large" type="primary" @click="setDifficulty('easy')">
+              <span slot="default" style="font-size: 30px">
+                简单
+              </span>
+              </el-button></el-col>
+            <el-col :span="8" class="button-group">
+              <el-button size="large" type="primary" @click="setDifficulty('normal')">
+              <span slot="default" style="font-size: 30px">
+                中等
+              </span>
+            </el-button></el-col>
+            <el-col :span="8" class="button-group">
+              <el-button size="large" type="primary" @click="setDifficulty('hard')">
+              <span slot="default" style="font-size: 30px">
+                困难
+              </span>
+            </el-button></el-col>
+        </el-row>
+        </span>
+      </el-dialog>
 </template>
 
 <style scoped lang="less">
@@ -207,7 +205,7 @@ export default {
 .square1 {
   width: 40px;
   height: 2px;
-  background-color: rgb(253, 253, 253);
+  background-color: rgb(248, 246, 246);
   background-image: linear-gradient(to bottom right, rgb(0, 0, 0), rgb(255, 255, 255));
   position: absolute;
   left: calc(50% - 20px); // 水平居中
@@ -284,9 +282,10 @@ export default {
 }
 .start-button{
   position: absolute;
+  left: 0;
+  right: 0;
+  width: 100px;
   top:50%;
-  left:0;
-  right:0;
   margin:auto;
 }
 .button-group{
