@@ -13,15 +13,25 @@ npm run dev
 
 ## 主要的文件说明
 ```
-/src
-|-/views
-navBar.vue // 前端的导航栏功能
-selectSudokuPage.vue // 从9个数独中选择的界面
-startPage.vue // 开始界面
-sudokuPage.vue // 单个数独显示的界面
-|-/utils
-flexible.js // rem适配的两个js文件
-rem.js
-request.js // Axios封装
-sudokuUtil.js // 统一的数独请求接口
+src
+├─ App.vue
+├─ assets
+│    ├─ base.css
+│    ├─ logo.svg
+│    └─ main.css
+├─ main.js
+├─ router
+│    └─ index.js
+├─ stores
+│    └─ dataStore.js
+├─ utils
+│    ├─ flexible.js // Rem适配
+│    ├─ rem.js
+│    ├─ request.js
+│    └─ sudokuUtil.js // Axios 请求数独数据封装
+└─ views
+       ├─ navBar.vue // 导航栏
+       ├─ selectSudokuPage.vue // 选择大数独界面
+       ├─ startPage.vue // 开始界面
+       ├─ sudokuPage.vue // 小数独界面 
 ```

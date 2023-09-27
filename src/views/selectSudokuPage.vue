@@ -1,7 +1,6 @@
 
 <script>
 import request from '../utils/request'
-import {dataStore} from "@/stores/dataStore"
 import { ref } from 'vue'
 import {getSudokuUtil} from "@/utils/sudokuUtil";
 export default {
