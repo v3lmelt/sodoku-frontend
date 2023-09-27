@@ -81,10 +81,12 @@ export default {
 
 li{
   font-size: 0.6rem;
+  margin-left: 0.5rem;
 }
 
 h2{
   font-size: 0.75rem;
+  margin-left: 5px;
 }
 .fade-enter-active,
 .fade-leave-active {
