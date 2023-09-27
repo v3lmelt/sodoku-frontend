@@ -1,7 +1,8 @@
 import axios from 'axios'
+import {backendIP, backendPort} from "../../backendConfiguration";
 
 const request = axios.create({
-    baseURL: 'http://localhost:8000/',
+    baseURL: `http://${backendIP}:${backendPort}/`,
     timeout: 60000
 })
 
