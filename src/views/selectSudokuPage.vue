@@ -147,6 +147,7 @@ export default {
 };
 </script>
 <template>
+  <div>
   <!-- 界面顶部栏：返回、标题、帮助按钮 -->
   <div class="selectSudokuPage">
 
@@ -185,6 +186,7 @@ export default {
       </div>
 
     </div>
+  </div>
 </template>
 
 <style>

@@ -1,8 +1,16 @@
 <script>
 import { ref } from 'vue'
+import {RouterView} from "vue-router";
+import {ArrowLeft} from "@element-plus/icons-vue";
 
 
 export default {
+  computed: {
+    ArrowLeft() {
+      return ArrowLeft
+    }
+  },
+  components: {RouterView},
   data(){
     const drawer = ref(false)
     return{drawer}
@@ -17,6 +25,7 @@ export default {
 </script>
 
 <template>
+  <div>
   <div class="head">
     <el-page-header :icon="ArrowLeft" @back="() => {this.$router.go(-1)}" >
         <template #content>
@@ -47,10 +56,12 @@ export default {
     <li>中等：你的谜题里将会有40个空格。</li>
     <li>困难：你的谜题里将会有64个空格。</li>
   </el-drawer>
-  <div>
-    <router-view></router-view>
+    <router-view v-slot="{ Component }">
+      <transition name="fade" mode="out-in">
+          <component :is="Component" />
+      </transition>
+    </router-view>
   </div>
-
 </template>
 
 <style scoped>
@@ -74,5 +85,14 @@ li{
 
 h2{
   font-size: 0.75rem;
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.4s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
