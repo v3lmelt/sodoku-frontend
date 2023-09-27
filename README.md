@@ -1,7 +1,7 @@
 # Sudoku - Frontend
 本前端基于Vue 3制作。
 
-## 构建并运行
+## 运行
 在Clone操作之后，打开项目文件夹，执行以下指令。
 ```
 npm install
