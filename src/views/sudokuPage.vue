@@ -1,26 +1,36 @@
 <script>
+import {ref} from "vue";
+import {saveSudokuToLocalstorage, sudokuJSONParser} from "@/utils/sudokuUtil";
+
 export default {
   data() {
+    //sudokuVerify
+    const originSudoku = JSON.parse(localStorage.getItem("sudokuVerify"))[this.$route.params.sudokuID]
     return {
-      smallSquares: []
+      smallSquares: [],
+      sudoku: ref(JSON.parse(localStorage.getItem("sudokuArray"))[this.$route.params.sudokuID]),
+      originSudoku,
+      sudokuId:this.$route.params.sudokuID,
+      col:-1,//列
+      row:-1,//行
+      square:-1//宫
     };
   },
   mounted() {
-    const sudoku = JSON.parse(localStorage.getItem("sudokuArray"))[this.$route.params.sudokuID]
-
-    console.log(sudoku)
+    console.log(this.sudoku)
     for (let i = 0; i < 3; i++) {
       for (let j = 0; j < 3; j++) {
         let smallSquares = { cells: [] };
+        //小正方形
         for (let m = i * 3; m < i * 3 + 3; m++) {
           for (let n = j * 3; n < j * 3 + 3; n++) {
             let cells = {
               rowIndex: m,
               colIndex: n,
               squareIndex: i + j * 3,
-              valueIndex:sudoku[m][n],
+              valueIndex:Number(this.sudoku[m][n]),
               cellIndex: m * 9 + n,
-              value: sudoku[m][n] || null
+              value: this.sudoku[m][n] || null
             };
             smallSquares.cells.push(cells);
           }
@@ -36,15 +46,14 @@ export default {
       cells.forEach((cells) => {
         cells.classList.remove('highlight');
         cells.classList.remove('highlight2');
+        cells.classList.remove('error-high-light');
       });
       // 将 NodeList 转换为数组
       let cellsArray = Array.from(cells);
-
       // 自定义比较函数，根据 cellIndex 属性从大到小排序
       function compare(a, b) {
         const cellIndexA = parseInt(a.dataset.cellIndex);
         const cellIndexB = parseInt(b.dataset.cellIndex);
-
         if (cellIndexA > cellIndexB) {
           return 1;
         } else if (cellIndexA < cellIndexB) {
@@ -57,6 +66,9 @@ export default {
       cellsArray.sort(compare);
       const targetCell = cellsArray[cellIndex];
       const { rowIndex, colIndex, squareIndex, valueIndex } = targetCell.dataset;
+      this.row = rowIndex
+      this.col = colIndex
+      this.square = squareIndex
       const targetCells = document.querySelectorAll(
           `.cells[data-row-index="${rowIndex}"], .cells[data-col-index="${colIndex}"], .cells[data-square-index="${squareIndex}"]`
       );
@@ -68,34 +80,69 @@ export default {
           cells.classList.add('highlight2');
         });
       }
-
       targetCells.forEach((cells) => {
         cells.classList.add('highlight');
+        cells.row
+      });
+      targetCell.classList.add('highlight2');
+    },
+    errorHighLight(row,col,square,num){
+      let cells = document.querySelectorAll('.cells');
+      cells.forEach((cells) => {
+        cells.classList.remove('error-high-light');
+      });
+      if(!num){
+        return
+      }
+      const targetCells = Array.from(document.querySelectorAll('.cells')).filter(cell => {
+        //找出同行、同列、同3X3内数值相同且不是自身的格子
+        const rowIndex = cell.getAttribute('data-row-index');
+        const colIndex = cell.getAttribute('data-col-index');
+        const squareIndex = cell.getAttribute('data-square-index');
+        const valueIndex = cell.getAttribute('data-value-index');
+        return (rowIndex === row || colIndex === col || squareIndex === square) && valueIndex == Number(num)
+            && !(rowIndex === row && colIndex === col && squareIndex === square);
+      });
+      //标红找出来的格子，代表这个空填错了
+      targetCells.forEach((cells) => {
+        cells.classList.add('error-high-light');
       });
 
-
-      targetCell.classList.add('highlight2');
+      //如果没有找到，代表当前位置填的数符合数独规则（但不一定是正确的
+      //找出当前格子并修改data-value-index作为之后的标记
+      if(!(targetCells.length > 0)){
+        const targetCell = Array.from(document.querySelectorAll('.cells')).filter(cell => {
+          const rowIndex = cell.getAttribute('data-row-index');
+          const colIndex = cell.getAttribute('data-col-index');
+          const squareIndex = cell.getAttribute('data-square-index');
+          return rowIndex === row && colIndex === col && squareIndex === square;
+        });
+        targetCell.forEach((cells) => {
+          cells.setAttribute('data-value-index', Number(num));
+        });
+      }
+      //返回是否错误
+      return targetCells.length > 0 ? 1 : 0;
+    },
+    inputNum(num){
+      //原本数独中为0的位置才能填空
+      if(this.row >= 0 &&this.col >= 0 && !this.originSudoku[this.row][this.col]){
+        //填上数字
+        this.sudoku[this.row][this.col]=num
+        const flag = this.errorHighLight(this.row,this.col,this.square,num)
+        if(!flag){
+          saveSudokuToLocalstorage(this.sudokuId, this.sudoku)
+        }else{
+          this.sudoku[this.row][this.col]=0
+          saveSudokuToLocalstorage(this.sudokuId, this.sudoku)
+        }
+      }
     }
   }
 }
 </script>
 <template>
   <div>
-    <!-- 界面顶部栏：返回、标题、帮助按钮 -->
-    <!-- <div class="top-bar">
-      <el-page-header :icon="ArrowLeft" @back="() => {this.$router.push({name: 'selectSudokuPage'})}" >
-        <template #content>
-          <span class="title"> 选择数独 </span>
-        </template>
-        <template #extra>
-          <div class="flex items-center">
-            <el-button class="help-button">帮助</el-button>
-          </div>
-        </template>
-      </el-page-header>
-      <el-divider />
-    </div> -->
-
     <div class="sudoku-square">
       <div v-for="(smallSquares, index) in smallSquares" :key="index" class="small-square">
         <span
@@ -108,13 +155,29 @@ export default {
             :data-cell-index="cells.cellIndex"
             :data-value-index="cells.valueIndex"
             @click="highlightCells(cells.cellIndex)"
+            :class="{'player-num': this.originSudoku[cells.rowIndex][cells.colIndex] === 0}"
         >
-          {{ cells.value }}
+          <template v-if="this.sudoku[cells.rowIndex][cells.colIndex]">
+            {{ this.sudoku[cells.rowIndex][cells.colIndex] }}
+          </template>
+
         </span>
       </div>
     </div>
-
+    <div class="select-button">
+      <el-button type="primary" @click="inputNum(1)">1</el-button>
+      <el-button type="primary" @click="inputNum(2)">2</el-button>
+      <el-button type="primary" @click="inputNum(3)">3</el-button>
+      <el-button type="primary" @click="inputNum(4)">4</el-button>
+      <el-button type="primary" @click="inputNum(5)">5</el-button>
+      <el-button type="primary" @click="inputNum(6)">6</el-button>
+      <el-button type="primary" @click="inputNum(7)">7</el-button>
+      <el-button type="primary" @click="inputNum(8)">8</el-button>
+      <el-button type="primary" @click="inputNum(9)">9</el-button>
+      <el-button type="primary" @click="inputNum(0)">0</el-button>
+    </div>
   </div>
+
 </template>
 <style>
 
@@ -141,8 +204,8 @@ export default {
   flex-wrap: wrap;
   justify-content: space-between;
   align-content: space-between;
-  width: 33.3%;
-  height: 33.3%;
+  width: 33.333%;
+  height: 33.333%;
   background-color: #fdfdfd;
   border-style: solid;
   border-color: rgb(52, 71, 96);
@@ -154,14 +217,18 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 33.3%;
-  height: 33.3%;
+  width: 33.333%;
+  height: 33.333%;
   background-color: rgb(255, 255, 255);
   opacity: 0.9;
   border-style: outset;
+  border-color: rgb(52, 71, 96);
   border-width: 1px;
-  border-radius: 3px;
   font-size: 1rem;
+}
+.player-num{
+  border-color: rgb(52, 71, 96);
+  color: #0071e1;
 }
 
 .serial-number {
@@ -178,5 +245,19 @@ export default {
 .highlight2 {
   background-color: rgb(186, 220, 249) !important;
   border-color: #000 !important;
+}
+.error-high-light{
+  background-color: red !important;
+  border-color: #000 !important;
+}
+.select-button{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right:0;
+
 }
 </style>

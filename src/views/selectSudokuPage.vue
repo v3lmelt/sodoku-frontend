@@ -1,33 +1,35 @@
 
 <script>
-import request from '../utils/request'
 import { ref } from 'vue'
 import {getSudokuUtil} from "@/utils/sudokuUtil";
 export default {
   data() {
     return {
       refreshButtonDisable: false,
-      loading :true,
+      loading: true,
       dynamicHTML: '',
       selectedDifficulty: '',
       selectedAPI: '',
+      showAnswer: false,
     };
   },
   mounted() {
     // 先获取难度
     let diff = localStorage.getItem("difficulty")
     // 用户不主动点击刷新数独的情况下，数独只从后台获取一次
-    if(!localStorage.getItem("sudokuArray")){
+    if (!localStorage.getItem("sudokuArray")) {
       // 从后端获取数独
       getSudokuUtil().then(
           (res) => {
             // 拿到的数据保存在localStorage中
-            localStorage.setItem("sudokuArray", JSON.stringify(res.sudoku))
+            localStorage.setItem("sudokuArray", JSON.stringify(res.sudoku));
+            localStorage.setItem("sudokuAnswer", JSON.stringify(res.answer));
+            localStorage.setItem("sudokuVerify", JSON.stringify(res.sudoku));
             this.generateSudoku();
             this.animation();
           }
       )
-    }else{
+    } else {
       this.generateSudoku();
       this.refreshAnimation();
     }
@@ -36,10 +38,10 @@ export default {
     this.selectedDifficulty = localStorage.getItem("difficulty") || "easy";
 
     // 用户选择生成的API应当在API选项卡上反应出来
-    this.selectedAPI = localStorage.getItem("APISetting") ||"FAST";
+    this.selectedAPI = localStorage.getItem("APISetting") || "FAST";
 
     window.jumpPage = (ID) => {
-      this.$router.push({ name: 'sudokuPage', params: {'sudokuID': ID } });
+      this.$router.push({name: 'sudokuPage', params: {'sudokuID': ID}});
     }
   },
   methods: {
@@ -76,7 +78,7 @@ export default {
      * 数独动画
      */
 
-    animation(){
+    animation() {
       //生成九个数独图形的动画，每个数独先后生成，从1.5倍到原大小，透明度由0到1
       setTimeout(() => {
         let divs = document.querySelectorAll(".fake-small-square");
@@ -95,7 +97,7 @@ export default {
             }, 100);
             setTimeout(() => {
               divs[k].style.pointerEvents = 'auto';
-            }, 150 * (9-k));
+            }, 150 * (9 - k));
           }, 100 * k);
         }
       }, 1);
@@ -105,15 +107,15 @@ export default {
      * 已存在数独用户再点击刷新时则不再播放动画
      */
 
-    refreshAnimation(){
+    refreshAnimation() {
       //从本地拿数据生成，不再播放动画
       setTimeout(() => {
         let divs = document.querySelectorAll(".fake-small-square");
         for (let k = 0; k < divs.length; k++) {
-              //最终样式
-              divs[k].style.transform = "scale(1)";
-              divs[k].style.opacity = 1;
-              divs[k].style.pointerEvents = 'auto';
+          //最终样式
+          divs[k].style.transform = "scale(1)";
+          divs[k].style.opacity = 1;
+          divs[k].style.pointerEvents = 'auto';
         }
       }, 1);
     },
@@ -122,7 +124,7 @@ export default {
      * 刷新生成的数独
      */
 
-    refreshSudoku(){
+    refreshSudoku() {
       // 禁用用户再点击刷新按钮，防止频繁向服务器发送请求
       this.refreshButtonDisable = true;
       // 修改加载界面
@@ -134,16 +136,49 @@ export default {
       getSudokuUtil().then(
           (res) => {
             // 拿到的数据保存在localStorage中
-            localStorage.setItem("sudokuArray", JSON.stringify(res.sudoku))
+            localStorage.setItem("sudokuAnswer", JSON.stringify(res.answer));
+            localStorage.setItem("sudokuArray", JSON.stringify(res.sudoku));
+            localStorage.setItem("sudokuVerify", JSON.stringify(res.sudoku));
             this.generateSudoku();
             this.animation();
             this.loading = false;
             this.refreshButtonDisable = false;
           }
       )
+    },
+    displayAnswer() {
+      // 如果showAnswer = false, 则显示答案
+      if (!this.showAnswer) {
+        // 显示答案，必须是存在数独数组和数独答案的情况下
+        if (localStorage.getItem("sudokuArray") && localStorage.getItem("sudokuAnswer")) {
+          // 缓冲区
+          let arr = localStorage.getItem("sudokuArray");
+          let ans = localStorage.getItem("sudokuAnswer");
+          localStorage.setItem("buffer", arr);
+          localStorage.setItem("sudokuArray", ans);
+          // 禁用按钮，防止用户在显示答案的时候刷新数独
+          this.refreshButtonDisable = true;
+          this.showAnswer = true;
+          // 如果showAnswer = true, 则禁用答案
+          this.generateSudoku();
+          this.animation();
+        }
+      }else{
+        if (localStorage.getItem("buffer")){
+          // 将原来数组还原即可
+          let buf = localStorage.getItem("buffer");
+          localStorage.setItem("sudokuArray", buf);
+          localStorage.removeItem("buffer");
+          this.refreshButtonDisable = false;
+          this.showAnswer = false;
+          this.generateSudoku();
+          this.animation();
+        }
+      }
     }
   }
-};
+}
+
 </script>
 <template>
   <div>
@@ -164,8 +199,8 @@ export default {
     <div class="select-sudoku-page-content">
       <div class="refresh">
         <!-- 刷新按钮 -->
-        <el-button class="refresh-button" @click="refreshSudoku()" :disabled="refreshButtonDisable">刷新</el-button>
-
+        <el-button class="refresh-button" @click="refreshSudoku" :disabled="refreshButtonDisable">刷新</el-button>
+        <el-button class="refresh-button" @click="displayAnswer">求解</el-button>
         <!-- 单选框 -->
         <el-radio-group v-model="selectedDifficulty" size="default">
           <el-radio-button label="easy">简单</el-radio-button>
