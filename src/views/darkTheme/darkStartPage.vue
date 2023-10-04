@@ -4,7 +4,7 @@ import router from "@/router";
 export default {
   data() {
     return {
-      numbers: [],radio1 : '默认'
+      numbers: [],
     };
   },
   methods: {
@@ -109,18 +109,18 @@ export default {
       }
 
       // 选择后跳转至9宫格界面
-      router.push({name: 'selectSudokuPage'})
+      router.push({name: 'darkSelectPage'})
     }
     /**
      * 变量
      */
     const isDialogVisible = ref(false);
-    function turnDark(){
-      router.push({name: 'darkStartPage'})
+    function turnDeafult(){
+      router.push({name: 'start'})
     }
 
 
-    return {consoleText,setDifficulty,isDialogVisible,turnDark}
+    return {consoleText,setDifficulty,isDialogVisible,turnDeafult}
   },
   mounted() {
     this.consoleText(['Multithread Sudoku', '多线程数独'], 'text',['tomato','rebeccapurple','lightblue']);
@@ -136,9 +136,9 @@ export default {
     <div class="background"></div>
     <div class="number" style="top: 0;left: 0;"></div>
     <el-button-group class="chose-theme">
-      <el-button type="primary">默认</el-button>
-      <el-button @click="turnDark()">深色</el-button>
-      <el-button >主题3</el-button>
+      <el-button style="color: black" @click="turnDeafult()">默认</el-button>
+      <el-button type="info">深色</el-button>
+      <el-button style="color: black" >主题3</el-button>
     </el-button-group>
     <div class='console-container'><span id='text'></span><div class='console-underscore' id='console'>&#95;</div></div>
     <el-button class="start-button" size="large" @click="isDialogVisible = true">开始</el-button>
@@ -148,24 +148,24 @@ export default {
         v-model="isDialogVisible"
         title="请选择难度"
         width="50%"
-        style="opacity: 0.9"
+        style="background-color: rgba(64, 64, 64, 0.9) !important;"
     >
       <span slot="footer" >
         <el-row justify="space-around">
           <el-col :span="8" class="button-group">
-            <el-button size="large" type="primary" @click="setDifficulty('easy')">
+            <el-button size="large" type="info" @click="setDifficulty('easy')">
             <span slot="default" style="font-size: 30px">
               简单
             </span>
             </el-button></el-col>
           <el-col :span="8" class="button-group">
-            <el-button size="large" type="primary" @click="setDifficulty('normal')">
+            <el-button size="large" type="info" @click="setDifficulty('normal')">
             <span slot="default" style="font-size: 30px">
               中等
             </span>
           </el-button></el-col>
           <el-col :span="8" class="button-group">
-            <el-button size="large" type="primary" @click="setDifficulty('hard')">
+            <el-button size="large" type="info" @click="setDifficulty('hard')">
             <span slot="default" style="font-size: 30px">
               困难
             </span>
@@ -185,7 +185,7 @@ export default {
   display: block;
   width: 50px;
   font-size: 22px;
-  color: black;
+  color: rgb(255, 255, 255);
   animation-name: float;
   animation-iteration-count: infinite;
   animation-timing-function: linear;
@@ -243,7 +243,7 @@ export default {
   right: 0;
   width: 100vw;
   height: 100vh;
-  background-color: white;
+  background-color: rgb(56, 56, 56);
   animation-timing-function: linear;
   z-index: -1;
 }
@@ -251,6 +251,8 @@ export default {
   position: absolute;
   top: 1rem;
   right: 1rem;
+  opacity: 0.4;
+  color: black
 }
 .content{
   background: rgba(40, 40, 40, 0.98);
@@ -291,6 +293,8 @@ export default {
   width: 100px;
   top:50%;
   margin:auto;
+  opacity: 0.4;
+  color: black
 }
 .button-group{
   margin-top: 15%;

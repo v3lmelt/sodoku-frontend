@@ -18,6 +18,7 @@ export default {
     };
   },
   mounted() {
+    console.log(this.sudoku)
     for (let i = 0; i < 3; i++) {
       for (let j = 0; j < 3; j++) {
         let smallSquares = { cells: [] };
@@ -110,7 +111,7 @@ export default {
 
       //如果没有找到，代表当前位置填的数符合数独规则（但不一定是正确的
       //找出当前格子并修改data-value-index作为之后的标记
-      if(!(targetCells.length > -1)){
+      if(!(targetCells.length > 0)){
         const targetCell = Array.from(document.querySelectorAll('.cells')).filter(cell => {
           const rowIndex = cell.getAttribute('data-row-index');
           const colIndex = cell.getAttribute('data-col-index');
@@ -217,32 +218,32 @@ export default {
 
         </span>
       </div>
+      <el-dialog
+          v-model="showMessage"
+          width="30%"
+          class="message-box"
+          center
+          align-center
+      >
+        <span class="message">恭喜你，成功完成本数独</span>
+      </el-dialog>
     </div>
     <div class="select-button">
-      <el-button type="primary" @click="inputNum(1)">1</el-button>
-      <el-button type="primary" @click="inputNum(2)">2</el-button>
-      <el-button type="primary" @click="inputNum(3)">3</el-button>
-      <el-button type="primary" @click="inputNum(4)">4</el-button>
-      <el-button type="primary" @click="inputNum(5)">5</el-button>
-      <el-button type="primary" @click="inputNum(6)">6</el-button>
-      <el-button type="primary" @click="inputNum(7)">7</el-button>
-      <el-button type="primary" @click="inputNum(8)">8</el-button>
-      <el-button type="primary" @click="inputNum(9)">9</el-button>
-      <el-button type="primary" @click="inputNum(0)">删除</el-button>
+      <el-button type="info" @click="inputNum(1)">1</el-button>
+      <el-button type="info" @click="inputNum(2)">2</el-button>
+      <el-button type="info" @click="inputNum(3)">3</el-button>
+      <el-button type="info" @click="inputNum(4)">4</el-button>
+      <el-button type="info" @click="inputNum(5)">5</el-button>
+      <el-button type="info" @click="inputNum(6)">6</el-button>
+      <el-button type="info" @click="inputNum(7)">7</el-button>
+      <el-button type="info" @click="inputNum(8)">8</el-button>
+      <el-button type="info" @click="inputNum(9)">9</el-button>
+      <el-button type="info" @click="inputNum(0)">删除</el-button>
     </div>
-    <el-dialog
-        v-model="showMessage"
-        width="30%"
-        class="message-box"
-        center
-        align-center
-    >
-      <span class="message">恭喜你，成功完成本数独</span>
-    </el-dialog>
   </div>
 
 </template>
-<style scoped>
+<style>
 
 .sudoku-square {
   position: fixed;
@@ -282,7 +283,7 @@ export default {
   align-items: center;
   width: 33.333%;
   height: 33.333%;
-  background-color: rgb(255, 255, 255);
+  background-color: rgb(129, 129, 129);
   opacity: 0.9;
   border-style: outset;
   border-color: rgb(52, 71, 96);
@@ -291,16 +292,22 @@ export default {
 }
 .player-num{
   border-color: rgb(52, 71, 96);
-  color: #0071e1;
+  color: #009de1;
+}
+
+.serial-number {
+  color: rgba(17, 25, 72, 0.897);
+  font-size: 100px;
+  font-weight: 900;
 }
 
 .highlight {
-  background-color: rgb(224, 233, 241) !important;
+  background-color: rgb(169, 169, 169) !important;
   border-color: #000 !important;
 }
 
 .highlight2 {
-  background-color: rgb(186, 220, 249) !important;
+  background-color: rgb(209, 209, 209) !important;
   border-color: #000 !important;
 }
 .error-high-light{
