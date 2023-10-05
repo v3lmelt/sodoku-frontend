@@ -7,7 +7,8 @@ import darkStartPage from "@/views/darkTheme/darkStartPage.vue"
 import darkNavBar from "@/views/darkTheme/darkNavBar.vue"
 import darkSelectPage from "@/views/darkTheme/darkSelectPage.vue"
 import darkSudokuPage from "@/views/darkTheme/darkSudokuPage.vue"
-import timer from "@/components/timer.vue"
+import timer from "@/components/sudokuTimer.vue"
+import timerTest from "@/views/timerTest.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,7 +26,7 @@ const router = createRouter({
     {
       path:'/test',
       name: 'testPage',
-      component: timer,
+      component: timerTest,
     },
     {
       path: '/navBar',
