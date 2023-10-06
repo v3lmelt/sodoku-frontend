@@ -33,7 +33,15 @@ export default {
       this.generateSudoku();
       this.refreshAnimation();
     }
-
+    //每次刷新返回游玩状态
+    if (localStorage.getItem("buffer")){
+      let buf = localStorage.getItem("buffer");
+      localStorage.setItem("sudokuArray", buf);
+      localStorage.removeItem("buffer");
+      this.refreshButtonDisable = false;
+      this.showAnswer = false;
+      this.generateSudoku();
+    }
     // 用户选择的难度应当在难度选项卡上反应出来
     this.selectedDifficulty = localStorage.getItem("difficulty") || "easy";
 
@@ -174,6 +182,12 @@ export default {
           this.generateSudoku();
           this.animation();
         }
+        setTimeout(() => {
+          let divs = document.querySelectorAll(".real-small-square");
+          for (let k = 0; k < divs.length; k++) {
+              divs[k].style.pointerEvents = 'none';
+          }
+        }, 1);
       }else{
         if (localStorage.getItem("buffer")){
           // 将原来数组还原即可
@@ -185,6 +199,12 @@ export default {
           this.generateSudoku();
           this.animation();
         }
+        setTimeout(() => {
+          let divs = document.querySelectorAll(".real-small-square");
+          for (let k = 0; k < divs.length; k++) {
+              divs[k].style.pointerEvents = 'auto';
+          }
+        }, 1);
       }
     }
   }

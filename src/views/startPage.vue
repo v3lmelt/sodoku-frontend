@@ -145,7 +145,6 @@ export default {
     <el-button-group class="chose-theme">
       <el-button type="primary">默认</el-button>
       <el-button @click="turnDark()">深色</el-button>
-      <el-button >主题3</el-button>
     </el-button-group>
     <div class='console-container'><span id='text'></span><div class='console-underscore' id='console'>&#95;</div></div>
     <el-button class="start-button" size="large" @click="isDialogVisible = true">开始</el-button>
