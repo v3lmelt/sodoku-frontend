@@ -4,16 +4,21 @@ export default {
   /**
    * enabled: 计时器是否开启
    * time: 双向绑定，取计时器的数值
+   * key: 当前数组编号，不同数组计时器不同
    */
 
   name: "sudokuTimer",
-  props: ['enabled', 'time'],
+  props: ['enabled', 'time','sudokuId' ],
   emits: ['update:time'],
   data(){
     return{
       totalSec: 0,
       intervalFlag:null,
     }
+  },
+  mounted() {
+    const timerArr = JSON.parse(localStorage.getItem("timerCount"));
+    this.totalSec = timerArr[this.sudokuId];
   },
   computed:{
     formattedSec(){
@@ -26,7 +31,6 @@ export default {
   methods:{
     timerControl(){
       this.totalSec += 1;
-      this.$emit('update:time', this.totalSec);
     },
     timerEnable(){
       this.intervalFlag = setInterval(this.timerControl, 1000);
@@ -35,8 +39,6 @@ export default {
   watch:{
     enabled(newVal, oldVal){
       if(oldVal === false && newVal === true){
-        // 初始化计时器
-        this.totalSec = 0;
         // 清空原来的事件
         if(this.intervalFlag){
           clearInterval(this.intervalFlag);
@@ -45,9 +47,13 @@ export default {
         this.timerEnable();
       }else{
         // 关闭计时器
-        if(this.intervalFlag){{
+        if (this.intervalFlag) {
           clearInterval(this.intervalFlag);
-        }}
+        }
+        // 保存计时器的值到 localStorage
+        const timerArr = JSON.parse(localStorage.getItem("timerCount"));
+        timerArr[this.sudokuId] = this.totalSec;
+        localStorage.setItem("timerCount", JSON.stringify(timerArr));
       }
     }
   }
@@ -55,7 +61,7 @@ export default {
 </script>
 
 <template>
-  <div>{{formattedMin}} : {{formattedSec}} </div>
+  <div>{{formattedMin}} : {{formattedSec.toString().padStart(2, '0')}}</div>
 </template>
 
 <style scoped>

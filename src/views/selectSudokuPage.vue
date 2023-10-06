@@ -145,6 +145,9 @@ export default {
             this.refreshButtonDisable = false;
           }
       )
+      //刷新后计时器归0
+      const timerCount = new Array(9).fill(0);
+      localStorage.setItem('timerCount', JSON.stringify(timerCount));
     },
     displayAnswer() {
       // 如果showAnswer = false, 则显示答案

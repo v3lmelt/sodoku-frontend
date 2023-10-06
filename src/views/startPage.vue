@@ -93,9 +93,16 @@ export default {
 
     /**
      * 设置数独难度，传入的difficulty的值应当为"easy", "normal", "hard"
+     * 同时创建计时器数组
      * @param difficulty
      */
     function setDifficulty(difficulty){
+      // 创建一个长度为9的int数组
+      const timerCount = new Array(9).fill(0);
+
+      // 存储到localStorage中，将数组转换为字符串再存储
+      localStorage.setItem('timerCount', JSON.stringify(timerCount));
+
       if(difficulty === "easy" || difficulty === "normal" || difficulty === "hard"){
         localStorage.setItem("difficulty", difficulty)
       }else{

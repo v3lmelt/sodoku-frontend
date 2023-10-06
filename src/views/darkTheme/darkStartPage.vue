@@ -96,6 +96,12 @@ export default {
      * @param difficulty
      */
     function setDifficulty(difficulty){
+      // 创建一个长度为9的int数组
+      const timerCount = new Array(9).fill(0);
+
+      // 存储到localStorage中，将数组转换为字符串再存储
+      localStorage.setItem('timerCount', JSON.stringify(timerCount));
+      
       if(difficulty === "easy" || difficulty === "normal" || difficulty === "hard"){
         localStorage.setItem("difficulty", difficulty)
       }else{

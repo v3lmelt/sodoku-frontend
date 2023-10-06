@@ -4,6 +4,7 @@ import {saveSudokuToLocalstorage, sudokuJSONParser} from "@/utils/sudokuUtil";
 
 export default {
   data() {
+    let timerCount = JSON.parse(localStorage.getItem("timerCount"))[this.$route.params.sudokuID]
     //sudokuVerify
     const originSudoku = JSON.parse(localStorage.getItem("sudokuVerify"))[this.$route.params.sudokuID]
     return {
@@ -14,10 +15,13 @@ export default {
       col:-1,//列
       row:-1,//行
       square:-1,//宫
-      showMessage:false
+      showMessage:false,
+      timerEnabled:false,
+      timerCount
     };
   },
   mounted() {
+    this.buttonEvent()
     console.log(this.sudoku)
     for (let i = 0; i < 3; i++) {
       for (let j = 0; j < 3; j++) {
@@ -39,6 +43,10 @@ export default {
         this.smallSquares.push(smallSquares);
       }
     }
+  },
+  beforeRouteLeave(to, from, next) {
+    this.buttonEvent()
+    next();
   },
   methods: {
     // 自定义比较函数，根据 cellIndex 属性从大到小排序
@@ -193,6 +201,10 @@ export default {
       }
       return true;
     },
+    buttonEvent(){
+      console.log(this.timerCount)
+      this.timerEnabled = !this.timerEnabled;
+    }
   }
 }
 </script>
@@ -218,15 +230,6 @@ export default {
 
         </span>
       </div>
-      <el-dialog
-          v-model="showMessage"
-          width="30%"
-          class="message-box"
-          center
-          align-center
-      >
-        <span class="message">恭喜你，成功完成本数独</span>
-      </el-dialog>
     </div>
     <div class="select-button">
       <el-button type="info" @click="inputNum(1)">1</el-button>
@@ -240,10 +243,32 @@ export default {
       <el-button type="info" @click="inputNum(9)">9</el-button>
       <el-button type="info" @click="inputNum(0)">删除</el-button>
     </div>
+    <div class="timer">
+      <div>目前花费时间：</div>
+      <sudoku-timer :enabled="timerEnabled" :time="timerCount" :sudokuId="this.$route.params.sudokuID"></sudoku-timer>
+    </div>
+    <el-dialog
+          v-model="showMessage"
+          width="30%"
+          class="message-box"
+          center
+          align-center
+      >
+        <span class="message">恭喜你，成功完成本数独</span>
+      </el-dialog>
   </div>
 
 </template>
-<style>
+<style scoped>
+.timer{
+  display: flex;
+  position: absolute;
+  top: 12%;
+  left: 40vw;
+  width: 20vw;
+  font-size: 2vw;
+  color:white;
+}
 
 .sudoku-square {
   position: fixed;

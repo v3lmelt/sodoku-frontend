@@ -24,7 +24,7 @@ const router = createRouter({
       component: darkStartPage,
     },
     {
-      path:'/test',
+      path: '/test',
       name: 'testPage',
       component: timerTest,
     },
