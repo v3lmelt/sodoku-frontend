@@ -30,9 +30,6 @@ export function saveSudokuToLocalstorage(i, arr){
         localStorage.setItem("sudokuArray", JSON.stringify(tmp));
     }
 }
-
-
-
 export function getSudokuUtil(){
     // 判断localStorage是否有对应设置项, 如果没有则设置为FAST
     if(!localStorage.getItem("APISetting")){
@@ -59,3 +56,18 @@ export function getSudokuUtil(){
     }
 }
 
+export function getSudokuAnswer(){
+    // 检查数独是否已经存在在localStorage中
+    let res = {sudoku:null};
+    if(localStorage.getItem("sudokuArray")){
+        res.sudoku = JSON.parse(localStorage.getItem("sudokuArray"));
+    }
+
+    console.log(res);
+    // 将其提交给后端，返回一个promise对象
+    if(res !== null){
+        return request.post("sudoku-answer", res);
+    }else{
+        throw new Error("Sudoku array not found or invalid!");
+    }
+}

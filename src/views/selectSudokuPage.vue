@@ -1,7 +1,7 @@
 
 <script>
 import { ref } from 'vue'
-import {getSudokuUtil} from "@/utils/sudokuUtil";
+import {getSudokuUtil, getSudokuAnswer} from "@/utils/sudokuUtil";
 export default {
   data() {
     return {
@@ -10,6 +10,7 @@ export default {
       dynamicHTML: '',
       selectedDifficulty: '',
       selectedAPI: '',
+      selectedAnswerAPI: '',
       showAnswer: false,
     };
   },
@@ -150,35 +151,44 @@ export default {
       localStorage.setItem('timerCount', JSON.stringify(timerCount));
     },
     displayAnswer() {
-      // 如果showAnswer = false, 则显示答案
-      if (!this.showAnswer) {
-        // 显示答案，必须是存在数独数组和数独答案的情况下
-        if (localStorage.getItem("sudokuArray") && localStorage.getItem("sudokuAnswer")) {
-          // 缓冲区
-          let arr = localStorage.getItem("sudokuArray");
-          let ans = localStorage.getItem("sudokuAnswer");
-          localStorage.setItem("buffer", arr);
-          localStorage.setItem("sudokuArray", ans);
-          // 禁用按钮，防止用户在显示答案的时候刷新数独
-          this.refreshButtonDisable = true;
-          this.showAnswer = true;
-          // 如果showAnswer = true, 则禁用答案
-          this.generateSudoku();
-          this.animation();
+
+        // 调用一下后台的答案生成
+        getSudokuAnswer().then((res) => {
+          if(res.answer){
+            localStorage.setItem("sudokuAnswer", JSON.stringify(res.answer));
+          }
+        })
+
+        // 如果showAnswer = false, 则显示答案
+        if (!this.showAnswer) {
+          // 显示答案，必须是存在数独数组和数独答案的情况下
+          if (localStorage.getItem("sudokuArray") && localStorage.getItem("sudokuAnswer")) {
+            // 缓冲区
+            let arr = localStorage.getItem("sudokuArray");
+            let ans = localStorage.getItem("sudokuAnswer");
+            localStorage.setItem("buffer", arr);
+            localStorage.setItem("sudokuArray", ans);
+            // 禁用按钮，防止用户在显示答案的时候刷新数独
+            this.refreshButtonDisable = true;
+            this.showAnswer = true;
+            // 如果showAnswer = true, 则禁用答案
+            this.generateSudoku();
+            this.animation();
+          }
+        }else{
+          if (localStorage.getItem("buffer")){
+            // 将原来数组还原即可
+            let buf = localStorage.getItem("buffer");
+            localStorage.setItem("sudokuArray", buf);
+            localStorage.removeItem("buffer");
+            this.refreshButtonDisable = false;
+            this.showAnswer = false;
+            this.generateSudoku();
+            this.animation();
+          }
         }
-      }else{
-        if (localStorage.getItem("buffer")){
-          // 将原来数组还原即可
-          let buf = localStorage.getItem("buffer");
-          localStorage.setItem("sudokuArray", buf);
-          localStorage.removeItem("buffer");
-          this.refreshButtonDisable = false;
-          this.showAnswer = false;
-          this.generateSudoku();
-          this.animation();
-        }
-      }
-    }
+
+    },
   }
 }
 
@@ -216,6 +226,8 @@ export default {
           <el-radio-button label="SLOW">SLOW</el-radio-button>
           <el-radio-button label="FAST">FAST</el-radio-button>
         </el-radio-group>
+
+
 
       </div>
       <div class="large-square" v-loading="loading" style="pointer-events: none" v-html="dynamicHTML"></div>

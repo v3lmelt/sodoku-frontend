@@ -1,7 +1,7 @@
 
 <script>
 import { ref } from 'vue'
-import {getSudokuUtil} from "@/utils/sudokuUtil";
+import {getSudokuAnswer, getSudokuUtil} from "@/utils/sudokuUtil";
 export default {
   data() {
     return {
@@ -150,6 +150,14 @@ export default {
       localStorage.setItem('timerCount', JSON.stringify(timerCount));
     },
     displayAnswer() {
+
+      // 调用一下后台的答案生成
+      getSudokuAnswer().then((res) => {
+        if(res.answer){
+          localStorage.setItem("sudokuAnswer", JSON.stringify(res.answer));
+        }
+      })
+
       // 如果showAnswer = false, 则显示答案
       if (!this.showAnswer) {
         // 显示答案，必须是存在数独数组和数独答案的情况下

@@ -1,8 +1,10 @@
 <script>
 import {ref} from "vue";
 import {saveSudokuToLocalstorage, sudokuJSONParser} from "@/utils/sudokuUtil";
+import SudokuTimer from "@/components/sudokuTimer.vue";
 
 export default {
+  components: {SudokuTimer},
   data() {
     let timerCount = JSON.parse(localStorage.getItem("timerCount"))[this.$route.params.sudokuID]
     //sudokuVerify
