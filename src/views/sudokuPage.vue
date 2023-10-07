@@ -101,9 +101,7 @@ export default {
       cells.forEach((cells) => {
         cells.classList.remove('error-high-light');
       });
-      if(!num){
-        return
-      }
+      
       const targetCells = Array.from(document.querySelectorAll('.cells')).filter(cell => {
         //找出同行、同列、同3X3内数值相同且不是自身的格子
         const rowIndex = cell.getAttribute('data-row-index');
@@ -113,14 +111,16 @@ export default {
         return (rowIndex === row || colIndex === col || squareIndex === square) && valueIndex == Number(num)
             && !(rowIndex === row && colIndex === col && squareIndex === square);
       });
-      //标红找出来的格子，代表这个空填错了
-      targetCells.forEach((cells) => {
-        cells.classList.add('error-high-light');
-      });
-
+      //如果非0才标红
+      if(num){
+        //标红找出来的格子，代表这个空填错了
+        targetCells.forEach((cells) => {
+          cells.classList.add('error-high-light');
+        });
+      }
       //如果没有找到，代表当前位置填的数符合数独规则（但不一定是正确的
       //找出当前格子并修改data-value-index作为之后的标记
-      if(!(targetCells.length > -1)){
+      if(targetCells.length == 0 || num == 0){
         const targetCell = Array.from(document.querySelectorAll('.cells')).filter(cell => {
           const rowIndex = cell.getAttribute('data-row-index');
           const colIndex = cell.getAttribute('data-col-index');
